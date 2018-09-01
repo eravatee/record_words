@@ -1,8 +1,5 @@
 # recording_words
 
-A new Flutter application.
+A Flutter application to record words and store them into a remote database. 
 
-## Getting Started
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
