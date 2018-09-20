@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.iml
 .gradle
 /local.properties
@@ -8,3 +9,14 @@
 /build
 /captures
 .externalNativeBuild
+=======
+.DS_Store
+.dart_tool/
+
+.packages
+.pub/
+
+build/
+
+.flutter-plugins
+>>>>>>> 9a1cf8aa29b0c20149715f65298253b8d464e136
