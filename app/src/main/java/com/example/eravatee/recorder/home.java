@@ -1,7 +1,6 @@
 package com.example.eravatee.recorder;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -11,15 +10,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
-
-import static android.os.Environment.getExternalStorageDirectory;
 
 public class home extends AppCompatActivity {
 
@@ -27,6 +24,7 @@ public class home extends AppCompatActivity {
     String pathSave = "";
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
+    private File audioFile;
 
     final int REQUEST_PERMISSION_CODE = 1000;
     @Override
@@ -46,9 +44,11 @@ public class home extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     if (checkPermissionFromDevice()) {
-                        pathSave = Environment.getExternalStorageDirectory()
-                                .getAbsolutePath() + "/"
-                                + UUID.randomUUID().toString() + "_audio_record.3gp";
+//                        pathSave = Environment.getExternalStorageDirectory()
+//                                .getAbsolutePath() + "/"
+//                                + UUID.randomUUID().toString() + "_audio_record.3gp";
+                        audioFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                                "audio_test.3gp");
                         setUpMediaRecorder();
 
                         try {
@@ -59,6 +59,7 @@ public class home extends AppCompatActivity {
                         }
                         play.setEnabled(false);
                         pause.setEnabled(false);
+                        stop.setEnabled(true);
 
                         Toast.makeText(home.this, "Recording", Toast.LENGTH_SHORT).show();
                     }
@@ -90,7 +91,7 @@ public class home extends AppCompatActivity {
                     mediaPlayer = new MediaPlayer();
                     try{
 
-                        mediaPlayer.setDataSource(pathSave);
+                        mediaPlayer.setDataSource(audioFile.getAbsolutePath());
                         mediaPlayer.prepare();
 
                     }catch(IOException e){
@@ -106,7 +107,6 @@ public class home extends AppCompatActivity {
             pause.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view){
-                    mediaRecorder.stop();
                     stop.setEnabled(false);
                     record.setEnabled(true);
                     pause.setEnabled(false);
@@ -129,7 +129,12 @@ public class home extends AppCompatActivity {
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-        mediaRecorder.setOutputFile(pathSave);
+        mediaRecorder.setAudioEncodingBitRate(16);
+        mediaRecorder.setAudioSamplingRate(44100);
+
+        mediaRecorder.setOutputFile(audioFile.getAbsolutePath());
+
+
     }
 
     private void requestPermission(){
