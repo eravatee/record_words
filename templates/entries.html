@@ -1,0 +1,24 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="/static/style.css"/>
+    <title>About</title>
+</head>
+<body>
+    <h1>play audio from the database</h1>
+    
+    {% for item1,item2,item3 in data %}
+    <table>
+        <tr>
+            <td> {{item1}} </td> 
+            <td> {{item2}}</td> 
+            <td> {{item3}} </td> 
+        </tr>
+    </table>
+    
+    {% endfor %}
+    <a href="{{ url_for('main') }}">insert a new entry</a>
+</body>
+</html>
