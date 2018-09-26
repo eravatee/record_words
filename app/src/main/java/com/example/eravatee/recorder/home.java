@@ -1,6 +1,7 @@
 package com.example.eravatee.recorder;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -12,19 +13,27 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.example.eravatee.recorder.Remote.RetrofitClient;
+import com.example.eravatee.recorder.Remote.UploadAPI;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
-
 public class home extends AppCompatActivity {
 
-    private Button record, stop, play, pause ;
-    String pathSave = "";
+    private Button record, stop, play, pause, upload ;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
     private File audioFile;
+    private static final String BASE_URL = "http://10.0.2.2/";
+
+    UploadAPI mService;
+    ProgressDialog dialog;
+    private UploadAPI getUpload(){
+        return RetrofitClient.getClient(BASE_URL).create(UploadAPI.class);
+    }
 
     final int REQUEST_PERMISSION_CODE = 1000;
     @Override
@@ -39,14 +48,12 @@ public class home extends AppCompatActivity {
         stop = findViewById(R.id.stop);
         record = findViewById(R.id.record);
         pause = findViewById(R.id.pause);
+        upload = findViewById(R.id.upload);
 
             record.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
                     if (checkPermissionFromDevice()) {
-//                        pathSave = Environment.getExternalStorageDirectory()
-//                                .getAbsolutePath() + "/"
-//                                + UUID.randomUUID().toString() + "_audio_record.3gp";
                         audioFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                                 "audio_test.3gp");
                         setUpMediaRecorder();
@@ -60,6 +67,7 @@ public class home extends AppCompatActivity {
                         play.setEnabled(false);
                         pause.setEnabled(false);
                         stop.setEnabled(true);
+                        upload.setEnabled(false);
 
                         Toast.makeText(home.this, "Recording", Toast.LENGTH_SHORT).show();
                     }
@@ -79,6 +87,7 @@ public class home extends AppCompatActivity {
                     play.setEnabled(true);
                     record.setEnabled(true);
                     pause.setEnabled(false);
+                    upload.setEnabled(true);
                 }
             });
             play.setOnClickListener(new View.OnClickListener(){
@@ -87,6 +96,7 @@ public class home extends AppCompatActivity {
                     stop.setEnabled(true);
                     record.setEnabled(false);
                     pause.setEnabled(true);
+                    upload.setEnabled(false);
 
                     mediaPlayer = new MediaPlayer();
                     try{
@@ -111,14 +121,29 @@ public class home extends AppCompatActivity {
                     record.setEnabled(true);
                     pause.setEnabled(false);
                     play.setEnabled(true);
+                    upload.setEnabled(true);
 
                     if(mediaPlayer != null)
                     {
                         mediaPlayer.stop();
                         mediaPlayer.release();
                         setUpMediaRecorder();
-
                     }
+                }
+            });
+
+            upload.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    stop.setEnabled(false);
+                    record.setEnabled(false);
+                    pause.setEnabled(false);
+                    play.setEnabled(false);
+
+                    mService = getUpload();
+
+
+
                 }
             });
 
