@@ -9,19 +9,20 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.example.eravatee.recorder.Remote.RetrofitClient;
 import com.example.eravatee.recorder.Remote.UploadAPI;
 
+import com.example.eravatee.recorder.dummy.DummyContent;
+
 import java.io.File;
 import java.io.IOException;
-public class home extends AppCompatActivity {
+public class home extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
     private Button record, stop, play, pause, upload ;
     MediaRecorder mediaRecorder;
@@ -39,7 +40,12 @@ public class home extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.content_home);
+
+        Fragment fragment = ItemFragment.newInstance(1);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_home, fragment)
+                .commit();
 
         if(!checkPermissionFromDevice())
             requestPermission();
@@ -189,5 +195,10 @@ public class home extends AppCompatActivity {
         int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int record_audio_result =  ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+
     }
 }
