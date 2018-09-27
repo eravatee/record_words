@@ -1,10 +1,10 @@
 package com.example.eravatee.recorder;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -15,37 +15,40 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import com.example.eravatee.recorder.Remote.RetrofitClient;
-import com.example.eravatee.recorder.Remote.UploadAPI;
 
 import com.example.eravatee.recorder.dummy.DummyContent;
-
+import com.example.eravatee.recorder.Remote.UploadAPI;
+import com.example.eravatee.recorder.Remote.RetrofitClient;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 public class home extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
-    private Button record, stop, play, pause, upload ;
+    private Button record, stop, play, pause, upload_to_server ;
     MediaRecorder mediaRecorder;
     MediaPlayer mediaPlayer;
     private File audioFile;
     private static final String BASE_URL = "http://10.0.2.2/";
-
-    UploadAPI mService;
-    ProgressDialog dialog;
-    private UploadAPI getUpload(){
-        return RetrofitClient.getClient(BASE_URL).create(UploadAPI.class);
-    }
-
     final int REQUEST_PERMISSION_CODE = 1000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_home);
+        setContentView(R.layout.activity_home);
 
-        Fragment fragment = ItemFragment.newInstance(1);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.content_home, fragment)
-                .commit();
+//        Fragment fragment = ItemFragment.newInstance(1);
+//        getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.content_home, fragment)
+//                .commit();
 
         if(!checkPermissionFromDevice())
             requestPermission();
@@ -54,7 +57,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
         stop = findViewById(R.id.stop);
         record = findViewById(R.id.record);
         pause = findViewById(R.id.pause);
-        upload = findViewById(R.id.upload);
+        upload_to_server = findViewById(R.id.upload);
 
             record.setOnClickListener(new View.OnClickListener(){
                 @Override
@@ -73,7 +76,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                         play.setEnabled(false);
                         pause.setEnabled(false);
                         stop.setEnabled(true);
-                        upload.setEnabled(false);
+                        upload_to_server.setEnabled(false);
 
                         Toast.makeText(home.this, "Recording", Toast.LENGTH_SHORT).show();
                     }
@@ -93,7 +96,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                     play.setEnabled(true);
                     record.setEnabled(true);
                     pause.setEnabled(false);
-                    upload.setEnabled(true);
+                    upload_to_server.setEnabled(true);
                 }
             });
             play.setOnClickListener(new View.OnClickListener(){
@@ -102,7 +105,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                     stop.setEnabled(true);
                     record.setEnabled(false);
                     pause.setEnabled(true);
-                    upload.setEnabled(false);
+                    upload_to_server.setEnabled(false);
 
                     mediaPlayer = new MediaPlayer();
                     try{
@@ -127,7 +130,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                     record.setEnabled(true);
                     pause.setEnabled(false);
                     play.setEnabled(true);
-                    upload.setEnabled(true);
+                    upload_to_server.setEnabled(true);
 
                     if(mediaPlayer != null)
                     {
@@ -138,7 +141,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                 }
             });
 
-            upload.setOnClickListener(new View.OnClickListener() {
+            upload_to_server.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     stop.setEnabled(false);
@@ -146,10 +149,7 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
                     pause.setEnabled(false);
                     play.setEnabled(false);
 
-                    mService = getUpload();
-
-
-
+                    uploadFile();
                 }
             });
 
@@ -195,6 +195,36 @@ public class home extends AppCompatActivity implements ItemFragment.OnListFragme
         int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int record_audio_result =  ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void uploadFile(){
+
+        File file = new File("/storage/emulated/0/Documents/audio_test.3gp");
+        Uri fileUri = Uri.fromFile(file);
+        RequestBody filePart = RequestBody.create(MediaType.parse(Objects.requireNonNull(getContentResolver().getType(fileUri))),file);
+
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("image", file.getName(), filePart);
+
+        RetrofitClient retrofit= null;
+
+
+        UploadAPI client = retrofit.getClient(BASE_URL).create(UploadAPI.class);
+
+        Call<ResponseBody> call = client.uploadFile(body);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody>call, Response<ResponseBody> response){
+                Toast.makeText(home.this, "upload successful",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody>call, Throwable t) {
+                Toast.makeText(home.this, "upload failure",Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 
     @Override
