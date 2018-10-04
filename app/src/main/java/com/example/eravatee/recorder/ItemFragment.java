@@ -6,14 +6,21 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.example.eravatee.recorder.dummy.DummyContent;
-import com.example.eravatee.recorder.dummy.DummyContent.DummyItem;
+import com.example.eravatee.recorder.Remote.RetrofitClient;
+import com.example.eravatee.recorder.Remote.UploadAPI;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A fragment representing a list of Items.
@@ -28,6 +35,7 @@ public class ItemFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    private List<SanskritWord> wordsList;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -60,6 +68,30 @@ public class ItemFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_item_list, container, false);
 
+        wordsList = new ArrayList<>();
+        wordsList.add(new SanskritWord(1, "CONNECTION PROBLEM"));
+        wordsList.add(new SanskritWord(2, "CONNECTION PROBLEM"));
+        wordsList.add(new SanskritWord(3, "CONNECTION PROBLEM"));
+        wordsList.add(new SanskritWord(4, "CONNECTION PROBLEM"));
+
+        Log.d("KAPPA", "onCreateView: " + wordsList.get(0).getWordId());
+
+        UploadAPI service = RetrofitClient.getClient().create(UploadAPI.class);
+        Call<List<SanskritWord>> call = service.getWords();
+
+        call.enqueue(new Callback<List<SanskritWord>>() {
+            @Override
+            public void onResponse(Call<List<SanskritWord>> call, Response<List<SanskritWord>> response) {
+                wordsList = response.body();
+            }
+
+            @Override
+            public void onFailure(Call<List<SanskritWord>> call, Throwable t) {
+                Toast.makeText(getActivity(), "Check your internet connection.", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -69,7 +101,7 @@ public class ItemFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(new MyItemRecyclerViewAdapter(wordsList, mListener));
         }
         return view;
     }
