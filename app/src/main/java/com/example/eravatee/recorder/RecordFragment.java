@@ -201,18 +201,15 @@ public class RecordFragment extends Fragment {
     }
 
     private void uploadFile(){
-        File file = new File("/storage/emulated/0/Documents/audio_test.3gp");
-        Uri fileUri = Uri.fromFile(file);
-        RequestBody filePart = RequestBody.create(MediaType.parse(Objects.requireNonNull(
-                getActivity().getContentResolver().getType(fileUri))), file);
+        File file = new File(getContext().getFilesDir(), "audio_test.3gp");
+
+        RequestBody filePart = RequestBody.create(MediaType.parse("multipart/form-data"),audioFile);
 
         MultipartBody.Part body =
-                MultipartBody.Part.createFormData("image", file.getName(), filePart);
+                MultipartBody.Part.createFormData("file", file.getName(), filePart);
 
-        RetrofitClient retrofit = null;
+        UploadAPI client = RetrofitClient.getClient().create(UploadAPI.class);
 
-
-        UploadAPI client = retrofit.getClient(BASE_URL).create(UploadAPI.class);
 
         Call<ResponseBody> call = client.uploadFile(body);
 
@@ -225,6 +222,7 @@ public class RecordFragment extends Fragment {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(getActivity(), "upload failure", Toast.LENGTH_SHORT).show();
+                Log.d("i am failing", t.toString());
             }
         });
     }
