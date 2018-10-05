@@ -1,60 +1,83 @@
 import os
-from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
+import json
+from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory,jsonify
 from werkzeug.utils import secure_filename
 from flask_uploads import UploadSet, configure_uploads, ALL
 from sqlalchemy import create_engine, Column, Integer, String, MetaData
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from flask_marshmallow import Marshmallow
-
+from flask_sqlalchemy import SQLAlchemy
 UPLOAD_FOLDER = 'uploads'
 app = Flask(__name__)
 app.config['UPLOADED_FILES_DEST'] = UPLOAD_FOLDER
-
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:bluebird@localhost/audio'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 engine = create_engine('mysql://root:bluebird@localhost/audio')
 metadata = MetaData()
+db = SQLAlchemy(app)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
+db.create_all()
 con = engine.connect()
-ma = Marshmallow(app)
 
 def init_db():
     metadata.create_all(bind=engine)
 
-class Records():
+class Records(db.Model):
     __tablename__ = "records"
-    Sr_no = Column(Integer, primary_key=True)
-    word = Column(String(80), unique=True, nullable=False)
-    location = Column(String(120), unique=True, nullable=False)
+    word = Column(String(80), primary_key=True)
+    location = Column(String(120))
+    def __init__(self, word,location):
+        self.word = word
+        self.location = location
+    @property
+    def serialize(self):
+       """Return object data in easily serializeable format"""
+       return {
+           'word' : self.word,
+           'location' : self.location      
+       }
+    def __repr__(self):
+        return "<Word: {}\n Location: {}".format(self.word, self.location)
 
-class AudioSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ('Sr_no','word', 'location')
+@app.route("/createdb", methods=['GET'])
+def database_gen():
+    db.create_all()
+    obj = Records(word = "hello", location="/uploads")
+    db.session.add(obj)
+    db.session.commit()
+    return "Executed successfully"
 
-audio_schema = AudioSchema()
-audio_schema = AudioSchema(many=True)
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/", methods=['GET'])
 def main():
-    
     return render_template('index.html')
 
-@app.route("/about")
+@app.route("/about", methods=['POST'])
 def about():
-    data = con.execute("SELECT * FROM records")
-    return render_template('entries.html', data = data)
+    query_result = Records.query.filter_by(location="/uploads").all()
+    return jsonify([i.serialize for i in query_result])
+    # records_dict = {}
+    # records_list = []
+    # for record in none_records:
+    #     records_dict.update({'word': record.word, 'location': record.location})
+    #     records_list.append(records_dict)
+    # return jsonify(records_list)
 
 files = UploadSet('files',ALL)
 configure_uploads(app,files)
-@app.route("/uploads", methods=['GET', 'POST'])
+
+@app.route("/uploads", methods=['POST'])
 def uploader():
-    if request.method == 'POST':
-        userDetails = request.form
-        word = userDetails['word']
-        filename = '/uploads/'+files.save(request.files['file'],name=word)
-        con.execute("UPDATE records set location = %s where word = %s",[filename,word])
-        return render_template('index.html')
+    word="hello"
+    uploaded_file = request.files['file']     
+    filename = '/uploads/'+files.save(uploaded_file,name=word)
+    # con.execute("UPDATE records set location = %s where word = %s",[filename,word])
+    update_location = Records.query.filter_by(word=word)
+    update_location.location = filename
+    db.session.add(update_location)
+    db.session.commit()
+    return render_template('index.html')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
