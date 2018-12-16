@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {
 
-    private final List<SanskritWord> mValues;
+    public static List<SanskritWord> mValues;
     private final OnListFragmentInteractionListener mListener;
 
     public MyItemRecyclerViewAdapter(List<SanskritWord> items, OnListFragmentInteractionListener listener) {
@@ -35,8 +35,9 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(String.valueOf(mValues.get(position).getWord()));
-        holder.mContentView.setText(mValues.get(position).getLocation());
+//        holder.mIdView.setText(String.valueOf(mValues.get(position).getWord()));
+        holder.mIdView.setText(String.valueOf(position+1));
+        holder.mContentView.setText(mValues.get(position).getWord());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

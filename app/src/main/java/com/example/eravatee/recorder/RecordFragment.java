@@ -29,7 +29,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -82,8 +81,8 @@ public class RecordFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.activity_home, container, false);
 
-        Log.d("RECORD_FRAGMENT", "Current Item No: " + listItemId);
-        Toast.makeText(getActivity(), "Current Item No: " + listItemId, Toast.LENGTH_SHORT).show();
+        Log.d("RECORD_FRAGMENT", "Current Word: " + MyItemRecyclerViewAdapter.mValues.get(listItemId).getWord());
+        Toast.makeText(getActivity(), "Current Word: " + MyItemRecyclerViewAdapter.mValues.get(listItemId).getWord(), Toast.LENGTH_SHORT).show();
 
         play = view.findViewById(R.id.play);
         stop = view.findViewById(R.id.stop);
