@@ -36,6 +36,7 @@ public class ItemFragment extends Fragment {
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    private RecyclerView recyclerView;
     private List<SanskritWord> wordsList;
 
     /**
@@ -77,7 +78,8 @@ public class ItemFragment extends Fragment {
         call.enqueue(new Callback<List<SanskritWord>>() {
             @Override
             public void onResponse(Call<List<SanskritWord>> call, Response<List<SanskritWord>> response) {
-//                wordsList = response.body();
+                wordsList = response.body();
+                populateList();
                 /*for(int i =0; i<wordsList.size(); i++)
                 {
 //                    wordsList.add(new SanskritWord("1","hello"));
@@ -101,7 +103,7 @@ public class ItemFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             if (mColumnCount <= 1) {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
             } else {
@@ -143,5 +145,10 @@ public class ItemFragment extends Fragment {
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
         void onListFragmentInteraction(int id);
+    }
+
+    private void populateList()
+    {
+        recyclerView.setAdapter(new MyItemRecyclerViewAdapter(wordsList, mListener));
     }
 }
