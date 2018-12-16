@@ -9,25 +9,17 @@ import com.google.gson.annotations.SerializedName;
 
 public class SanskritWord {
 
-    @SerializedName("id")
-    @Expose
-    private int wordId;
-
     @SerializedName("word")
     @Expose
     private String word;
 
-    public SanskritWord(int wordId, String word) {
-        this.wordId = wordId;
+    @SerializedName("location")
+    @Expose
+    private String location;
+
+    public SanskritWord(String word, String location) {
         this.word = word;
-    }
-
-    public int getWordId() {
-        return wordId;
-    }
-
-    public void setWordId(int wordId) {
-        this.wordId = wordId;
+        this.location = location;
     }
 
     public String getWord() {
@@ -36,5 +28,13 @@ public class SanskritWord {
 
     public void setWord(String word) {
         this.word = word;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

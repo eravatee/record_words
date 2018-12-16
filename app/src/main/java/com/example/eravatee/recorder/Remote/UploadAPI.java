@@ -14,11 +14,13 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 public interface UploadAPI {
+
+    @Headers("Content-Type: application/json")
+    @GET("about")
+    Call<List<SanskritWord>> getWords();
+
     @Multipart
     @POST("uploads")
     Call<ResponseBody>uploadFile(@Part MultipartBody.Part file);
 
-    @Headers("Content-Type: application/json")
-    @GET("words")
-    Call<List<SanskritWord>> getWords();
 }

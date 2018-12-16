@@ -47,7 +47,6 @@ public class RecordFragment extends Fragment {
     MediaPlayer mediaPlayer;
     private File audioFile;
     private Button record, stop, play, pause, upload_to_server;
-    private static final String BASE_URL = "http://10.0.2.2/";
     private OnFragmentInteractionListener mListener;
 
     public RecordFragment() {
@@ -217,6 +216,7 @@ public class RecordFragment extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Toast.makeText(getActivity(), "upload successful", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override

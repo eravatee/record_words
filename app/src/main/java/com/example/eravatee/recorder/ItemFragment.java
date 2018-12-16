@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.eravatee.recorder.Remote.RetrofitClient;
 import com.example.eravatee.recorder.Remote.UploadAPI;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,21 +70,26 @@ public class ItemFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_item_list, container, false);
 
         wordsList = new ArrayList<>();
-        wordsList.add(new SanskritWord(1, "CONNECTION PROBLEM"));
-        wordsList.add(new SanskritWord(2, "CONNECTION PROBLEM"));
-        wordsList.add(new SanskritWord(3, "CONNECTION PROBLEM"));
-        wordsList.add(new SanskritWord(4, "CONNECTION PROBLEM"));
-
-        Log.d("KAPPA", "onCreateView: " + wordsList.get(0).getWordId());
-
+        wordsList.add(new SanskritWord("1","hello"));
         UploadAPI service = RetrofitClient.getClient().create(UploadAPI.class);
         Call<List<SanskritWord>> call = service.getWords();
 
         call.enqueue(new Callback<List<SanskritWord>>() {
             @Override
             public void onResponse(Call<List<SanskritWord>> call, Response<List<SanskritWord>> response) {
-                wordsList = response.body();
+//                wordsList = response.body();
+                /*for(int i =0; i<wordsList.size(); i++)
+                {
+//                    wordsList.add(new SanskritWord("1","hello"));
+
+//                    wordsList.get(1).getWord();
+                }*/
+//                Log.d("Word", wordsList.get(1).getWord());
+//                Log.d("Location", wordsList.get(0).getLocation())
+
             }
+
+
 
             @Override
             public void onFailure(Call<List<SanskritWord>> call, Throwable t) {
